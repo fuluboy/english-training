@@ -90,7 +90,19 @@ h3 { margin-bottom:0; font-size:20px; }
 .feedback.neutral { background:var(--neutral-bg); color:var(--neutral); }
 .feedback strong { display:block; margin-bottom:6px; }
 .feedback .answer-note { color:var(--ink); margin-top:8px; }
-.feedback .example { margin-top:8px; color:#344054; font-style:italic; }
+.feedback .example { margin-top:10px; color:#344054; font-style:italic; }
+
+.word-card { margin:16px 0; padding:18px; border:1px solid var(--line); border-radius:16px; background:#fff; color:var(--ink); }
+.word-card-head { display:flex; align-items:center; justify-content:space-between; gap:16px; }
+.word-label { display:block; margin-bottom:2px; color:var(--muted); font-size:10px; font-weight:900; letter-spacing:.14em; }
+.word-term { display:block; font-size:26px; line-height:1.2; letter-spacing:-.02em; }
+.word-ipa { display:block; margin-top:5px; color:var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size:14px; }
+.pronounce-btn { flex:0 0 auto; border:1px solid var(--line); background:#f8fafc; color:var(--ink); border-radius:12px; padding:10px 12px; font-weight:800; }
+.pronounce-btn:hover:not(:disabled) { border-color:#a4a7ae; background:#f2f4f7; }
+.pronounce-btn:disabled { opacity:.5; cursor:wait; }
+.word-meaning { margin-top:15px; font-size:16px; }
+.word-definition { margin-top:5px; color:#475467; line-height:1.55; }
+.word-source { margin-top:8px; color:#98a2b3; font-size:11px; }
 
 .result-card { text-align:left; }
 .result-score { display:flex; gap:16px; align-items:baseline; margin:18px 0 26px; }
@@ -109,4 +121,7 @@ h3 { margin-bottom:0; font-size:20px; }
   .progress-wrap { padding-top:11px; }
   .question-card { border-radius:18px; }
   .result-score strong { font-size:48px; }
+  .word-card-head { align-items:flex-start; }
+  .word-term { font-size:24px; }
+  .pronounce-btn { padding:9px 10px; font-size:13px; }
 }
