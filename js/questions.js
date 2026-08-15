@@ -8,10 +8,10 @@ window.QUESTION_BANK = [
     type: "mcq",
     context: "Your manager gives you a task, but two requirements are unclear.",
     prompt: "Before starting the work, you should _____ the requirements with your manager.",
-    options: ["clarify", "announce", "estimate", "invest"],
+    options: ["clarify", "confirm", "estimate", "review"],
     answer: "clarify",
     knowledge: "clarify requirements",
-    note: "clarify + requirements = 把需求釐清到可執行的程度。",
+    note: "clarify requirements = 把不清楚的需求釐清到可以執行。confirm 比較偏確認既有資訊是否正確。",
     example: "I clarified the requirements before asking the team to estimate the work."
   },
   {
@@ -23,10 +23,10 @@ window.QUESTION_BANK = [
     type: "mcq",
     context: "You are describing a project that finished last month.",
     prompt: "We _____ the main cause of the drop-off by reviewing the session recordings.",
-    options: ["identified", "identify", "have identify", "identifies"],
+    options: ["identified", "identify", "have identified", "were identifying"],
     answer: "identified",
     knowledge: "past tense in project stories",
-    note: "已完成專案故事通常需要穩定使用過去式。",
+    note: "已完成的專案案例通常要穩定使用過去式。",
     example: "We identified the main cause and simplified the flow."
   },
   {
@@ -36,13 +36,13 @@ window.QUESTION_BANK = [
     domain: "General",
     skill: "Recognition",
     type: "mcq",
-    context: "You promised to send a document, but your colleague has not received it.",
-    prompt: "Your colleague asks you to _____ them if there is any delay.",
-    options: ["remind", "remember", "borrow", "avoid"],
+    context: "You may forget to submit a document before the deadline.",
+    prompt: "Could you _____ me tomorrow if I haven't sent the document yet?",
+    options: ["remind", "remember", "notice", "inform"],
     answer: "remind",
     knowledge: "remind someone",
-    note: "remind + 人 = 提醒某人；remember = 自己記得。",
-    example: "Please remind me if I forget to send the file."
+    note: "remind + 人 = 提醒某人記得做某事；remember = 自己記得。",
+    example: "Please remind me to send the file tomorrow."
   },
   {
     id: "B2-PM-004",
@@ -52,11 +52,11 @@ window.QUESTION_BANK = [
     skill: "Recognition",
     type: "mcq",
     context: "The team has four possible features but only enough engineering capacity to build one this sprint.",
-    prompt: "The PM needs to _____ the feature with the highest expected impact.",
-    options: ["prioritize", "facilitate", "announce", "investigate"],
+    prompt: "The PM needs to _____ the feature that creates the most value for users.",
+    options: ["prioritize", "validate", "scope", "evaluate"],
     answer: "prioritize",
     knowledge: "prioritize a feature",
-    note: "prioritize = 根據價值、風險或資源決定優先順序。",
+    note: "prioritize = 決定什麼應該先做。",
     example: "We prioritized the feature that addressed the largest user pain point."
   },
   {
@@ -68,10 +68,10 @@ window.QUESTION_BANK = [
     type: "mcq",
     context: "A new onboarding idea looks promising, but the team has not tested whether users actually need it.",
     prompt: "Before investing more resources, we should _____ the assumption with user research.",
-    options: ["validate", "allocate", "escalate", "facilitate"],
+    options: ["validate", "verify", "evaluate", "confirm"],
     answer: "validate",
     knowledge: "validate an assumption",
-    note: "validate an assumption = 用證據驗證假設。",
+    note: "validate an assumption = 用研究或數據證據驗證假設。",
     example: "We validated the assumption with five user interviews."
   },
   {
@@ -83,10 +83,10 @@ window.QUESTION_BANK = [
     type: "mcq",
     context: "A release was postponed because a payment service stopped working.",
     prompt: "The release was delayed _____ a technical issue.",
-    options: ["because of", "because", "although", "unless"],
+    options: ["because of", "because", "due", "although"],
     answer: "because of",
     knowledge: "because of + noun",
-    note: "because of 後面接名詞；because 後面通常接完整子句。",
+    note: "because of 後面接名詞；because 後面接完整子句。",
     example: "The launch was delayed because of a technical issue."
   },
   {
@@ -96,12 +96,12 @@ window.QUESTION_BANK = [
     domain: "Workplace",
     skill: "Recognition",
     type: "mcq",
-    context: "A customer reports a recurring checkout error.",
+    context: "A customer reports a recurring checkout error. You have several possible fixes, but first the problem itself must be dealt with.",
     prompt: "The team needs to _____ the issue before the next release.",
-    options: ["address", "announce", "borrow", "attend"],
+    options: ["address", "investigate", "resolve", "escalate"],
     answer: "address",
     knowledge: "address an issue",
-    note: "address an issue = 著手處理問題；語氣比 fix 更廣，也更適合職場。",
+    note: "address an issue = 著手處理問題。resolve 表示已把問題解決；investigate 偏調查原因。",
     example: "We addressed the issue by simplifying the validation logic."
   },
   {
@@ -111,12 +111,12 @@ window.QUESTION_BANK = [
     domain: "Product Management",
     skill: "Recognition",
     type: "mcq",
-    context: "Design wants a richer experience, while engineering is concerned about delivery time.",
+    context: "Design and engineering disagree on scope. The PM is trying to get both teams to commit to the same realistic direction before development starts.",
     prompt: "The PM should help both teams _____ on a realistic solution.",
-    options: ["align", "estimate", "launch", "monitor"],
+    options: ["align", "agree", "settle", "focus"],
     answer: "align",
     knowledge: "align on a solution",
-    note: "align on = 對某個方向形成共識。",
+    note: "align on = 跨角色對同一方向形成共識。agree 也有接近意思，但職場上 align on 更強調跨團隊對齊。",
     example: "We aligned on a smaller scope for the first release."
   },
   {
@@ -131,7 +131,7 @@ window.QUESTION_BANK = [
     answer: "clarify",
     accepted: ["clarify"],
     knowledge: "clarify requirements",
-    note: "把 clarify 與 requirements 綁在一起記，比單背 clarify 更容易在工作中叫得出來。",
+    note: "把 clarify 與 requirements 綁在一起記。",
     example: "First, I clarified the requirements with the sales team."
   },
   {
@@ -146,6 +146,10 @@ window.QUESTION_BANK = [
     answer: "validate",
     accepted: ["validate"],
     knowledge: "validate an assumption",
+    nearMisses: {
+      "presume": { type: "semantic-near-miss", feedback: "presume 是『假定、認為某件事大概成立』；這裡要表達的是用證據去驗證假設，因此用 validate。" },
+      "assume": { type: "semantic-near-miss", feedback: "assume 是『先假設』；validate 是『用證據驗證』。這兩個動作在產品流程中通常一前一後。" }
+    },
     note: "這是 Product / PM 很常用的搭配。",
     example: "We validated the assumption before building the feature."
   },
@@ -158,10 +162,10 @@ window.QUESTION_BANK = [
     type: "mcq",
     context: "You are describing a current product metric.",
     prompt: "The data _____ that most users leave during the verification step.",
-    options: ["shows", "show", "showing", "have shown"],
+    options: ["shows", "show", "showing", "has show"],
     answer: "shows",
     knowledge: "subject-verb agreement",
-    note: "在這個句型裡 data 被當成整體資料集合來描述時，商務英文常見用 shows。",
+    note: "在一般商務英文裡，data 常被當成整體資料集合，使用 shows 很常見。",
     example: "The data shows that most users leave at this step."
   },
   {
@@ -171,12 +175,12 @@ window.QUESTION_BANK = [
     domain: "General",
     skill: "Article",
     type: "mcq",
-    context: "You are introducing a specific problem for the first time.",
+    context: "You are introducing one checkout problem for the first time.",
     prompt: "We found _____ issue in the checkout flow.",
-    options: ["an", "a", "the", "—"],
+    options: ["an", "a", "the", "no article"],
     answer: "an",
     knowledge: "article before singular countable noun",
-    note: "單數可數名詞第一次提到通常需要 a/an；issue 以母音音素開頭，用 an。",
+    note: "單數可數名詞第一次提到通常要 a/an；issue 以母音音素開頭。",
     example: "We found an issue in the checkout flow."
   },
   {
@@ -186,12 +190,12 @@ window.QUESTION_BANK = [
     domain: "Workplace",
     skill: "Recognition",
     type: "mcq",
-    context: "A problem appears during a live demo, and you need to manage it calmly.",
+    context: "A problem appears during a live demo. You need to manage the immediate situation first, then investigate the root cause after the meeting.",
     prompt: "I can _____ the issue first and investigate the root cause after the meeting.",
-    options: ["deal with", "depend on", "result in", "point out"],
+    options: ["deal with", "point out", "follow up on", "look into"],
     answer: "deal with",
     knowledge: "deal with an issue",
-    note: "deal with = 處理；很常見，但要避免所有情境都只用這一個泛用片語。",
+    note: "deal with = 處理眼前情況。look into 偏調查；follow up on 偏後續追蹤。",
     example: "I dealt with the urgent issue first, then investigated the cause."
   },
   {
@@ -201,12 +205,12 @@ window.QUESTION_BANK = [
     domain: "Product Management",
     skill: "Recognition",
     type: "mcq",
-    context: "The team wants to know whether a redesigned flow actually improved conversion after launch.",
+    context: "The team wants evidence about whether a redesigned flow actually improved conversion after launch.",
     prompt: "We should _____ the impact for at least two weeks before making another change.",
-    options: ["measure", "announce", "assign", "facilitate"],
+    options: ["measure", "monitor", "evaluate", "review"],
     answer: "measure",
     knowledge: "measure impact",
-    note: "measure impact / performance / conversion 都是很常見的工作搭配。",
+    note: "measure impact = 把成效量化。monitor 偏持續觀察；evaluate 偏整體評估。",
     example: "We measured the impact after launch and saw a 12% improvement."
   },
   {
@@ -217,8 +221,8 @@ window.QUESTION_BANK = [
     skill: "Recognition",
     type: "mcq",
     context: "A release has several known risks. You cannot remove all of them, but you can reduce their likelihood or impact.",
-    prompt: "The team created a fallback plan to _____ the release risk.",
-    options: ["mitigate", "announce", "clarify", "attend"],
+    prompt: "The team created a rollback plan to _____ the release risk.",
+    options: ["mitigate", "manage", "avoid", "resolve"],
     answer: "mitigate",
     knowledge: "mitigate risk",
     note: "mitigate risk = 降低風險發生機率或影響程度。",
@@ -231,12 +235,15 @@ window.QUESTION_BANK = [
     domain: "Workplace",
     skill: "Productive",
     type: "typing",
-    context: "請輸入最自然的英文動詞。",
+    context: "請輸入能直接放進空格的自然英文。",
     prompt: "「處理這個問題」\n_____ the issue",
     answer: "address",
     accepted: ["address", "handle"],
+    nearMisses: {
+      "deal": { type: "missing-preposition", feedback: "deal 的意思方向是對的，但這個片語要完整寫成 deal with the issue。這題空格只能放一個能直接接 the issue 的動詞，所以 address / handle 才能直接放入。" }
+    },
     knowledge: "address an issue",
-    note: "address / handle 都可以；在描述改善與解決流程時，address 很實用。",
+    note: "address / handle 都可以直接接 issue；deal 需要 with。",
     example: "We addressed the issue in the next release."
   },
   {
@@ -246,9 +253,9 @@ window.QUESTION_BANK = [
     domain: "General",
     skill: "Conditionals",
     type: "mcq",
-    context: "You are describing what you would do in a hypothetical future project.",
+    context: "You are describing what you would do differently in a hypothetical future project.",
     prompt: "If I _____ the project again, I would involve users earlier.",
-    options: ["did", "do", "will do", "have done"],
+    options: ["did", "do", "would do", "had done"],
     answer: "did",
     knowledge: "second conditional",
     note: "If + past simple, would + verb 用來描述假設情境。",
@@ -261,12 +268,12 @@ window.QUESTION_BANK = [
     domain: "Product Management",
     skill: "Recognition",
     type: "mcq",
-    context: "The roadmap depends on another platform team finishing an API first.",
-    prompt: "The API team is a key _____ for our release plan.",
-    options: ["dependency", "assumption", "trade-off", "metric"],
+    context: "Your team cannot complete the release until another platform team finishes an API first.",
+    prompt: "That API delivery is a key _____ for our release plan.",
+    options: ["dependency", "assumption", "constraint", "trade-off"],
     answer: "dependency",
     knowledge: "project dependency",
-    note: "dependency = 你的工作能否進行取決於另一件事或另一個團隊。",
+    note: "dependency = 你的工作能否進行取決於另一件事或另一個團隊。constraint 是限制條件；assumption 是尚待驗證的假設。",
     example: "We identified the API integration as a key dependency."
   },
   {
@@ -281,7 +288,7 @@ window.QUESTION_BANK = [
     answer: "measure",
     accepted: ["measure"],
     knowledge: "measure impact",
-    note: "面試敘述 Result 時，measure 是需要能主動叫出的核心動詞。",
+    note: "描述 Result 時，measure 是需要能主動叫出的核心動詞。",
     example: "We measured the impact after launch."
   },
   {
@@ -291,12 +298,12 @@ window.QUESTION_BANK = [
     domain: "General",
     skill: "Recognition",
     type: "mcq",
-    context: "You want to join a workshop next Friday.",
+    context: "You want to be present at a workshop next Friday as a participant.",
     prompt: "I plan to _____ the workshop next Friday.",
-    options: ["attend", "join in", "borrow", "avoid"],
+    options: ["attend", "join", "participate", "visit"],
     answer: "attend",
     knowledge: "attend an event",
-    note: "attend + meeting/workshop/event；通常不需要介系詞。",
+    note: "attend + meeting/workshop/event；不需要介系詞。participate 通常要搭配 in。",
     example: "I attended the workshop last Friday."
   }
 ];
