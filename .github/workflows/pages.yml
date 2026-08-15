@@ -24,6 +24,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Validate question bank
+        run: |
+          node --check js/app.js
+          node --check js/questions.js
+          node scripts/smoke-test.js
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
