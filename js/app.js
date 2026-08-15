@@ -1,13 +1,17 @@
 (() => {
   const STORAGE_KEY = "english-training-attempts-v1";
   const SESSION_SIZE = 20;
+  const BANK_VERSION = "mvp-0.2";
   const bank = window.QUESTION_BANK || [];
 
   const $ = (id) => document.getElementById(id);
   const views = [$("homeView"), $("quizView"), $("resultView")];
 
+  const uid = () => crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
+
   const state = {
     mode: "training",
+    sessionId: null,
     questions: [],
     index: 0,
     startedAt: 0,
@@ -37,7 +41,7 @@
     return a;
   };
 
-  const normalize = (value) => value.trim().toLowerCase().replace(/\s+/g, " ");
+  const normalize = (value) => String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
 
   const getQuestionStats = (attempts) => {
     const map = new Map();
@@ -78,12 +82,24 @@
     return result;
   };
 
+  const diagnosticSample = (items, size) => {
+    const result = [];
+    const seenKnowledge = new Set();
+    shuffle(items).forEach(q => {
+      if (result.length >= size || seenKnowledge.has(q.knowledge)) return;
+      seenKnowledge.add(q.knowledge);
+      result.push(q);
+    });
+    return result;
+  };
+
   const startSession = (mode) => {
     const attempts = loadAttempts();
     const stats = getQuestionStats(attempts);
     state.mode = mode;
+    state.sessionId = uid();
     state.questions = mode === "diagnostic"
-      ? shuffle(bank).slice(0, Math.min(SESSION_SIZE, bank.length))
+      ? diagnosticSample(bank, SESSION_SIZE)
       : weightedSample(bank, Math.min(SESSION_SIZE, bank.length), stats);
     state.index = 0;
     state.sessionAttempts = [];
@@ -133,6 +149,11 @@
     return String(value).replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
   }
 
+  const getNearMiss = (q, rawAnswer) => {
+    if (!q.nearMisses) return null;
+    return q.nearMisses[normalize(rawAnswer)] || null;
+  };
+
   const submitAnswer = () => {
     if (state.locked) return;
     const q = state.questions[state.index];
@@ -142,12 +163,16 @@
 
     const accepted = (q.accepted || [q.answer]).map(normalize);
     const correct = accepted.includes(normalize(rawAnswer));
+    const nearMiss = correct ? null : getNearMiss(q, rawAnswer);
     state.locked = true;
 
     const attempt = {
-      attemptId: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
+      attemptId: uid(),
+      sessionId: state.sessionId,
+      bankVersion: BANK_VERSION,
       timestamp: new Date().toISOString(),
       mode: state.mode,
+      questionIndex: state.index,
       questionId: q.id,
       cefr: q.cefr,
       category: q.category,
@@ -158,6 +183,8 @@
       answer: rawAnswer,
       correctAnswer: q.answer,
       correct,
+      errorType: correct ? null : (nearMiss?.type || "incorrect"),
+      nearMiss: Boolean(nearMiss),
       responseMs
     };
 
@@ -166,23 +193,43 @@
     saveAttempts(all);
     state.sessionAttempts.push(attempt);
 
-    if (q.type === "mcq") {
-      document.querySelectorAll(".choice").forEach(btn => {
-        const val = normalize(btn.dataset.value);
-        if (val === normalize(q.answer)) btn.classList.add("correct");
-        if (btn.classList.contains("selected") && !correct) btn.classList.add("incorrect");
-      });
-    } else {
-      $("typingInput").disabled = true;
-    }
+    if (q.type === "typing") $("typingInput").disabled = true;
 
     const feedback = $("feedback");
-    feedback.className = `feedback ${correct ? "correct" : "incorrect"}`;
-    feedback.innerHTML = `
-      <strong>${correct ? "答對了" : `正確答案：${escapeHtml(q.answer)}`}</strong>
-      <div class="answer-note">${escapeHtml(q.note || "")}</div>
-      ${q.example ? `<div class="example">${escapeHtml(q.example)}</div>` : ""}
-    `;
+
+    if (state.mode === "diagnostic") {
+      feedback.className = "feedback neutral";
+      feedback.innerHTML = `
+        <strong>已記錄</strong>
+        <div class="answer-note">診斷模式不立即揭示答案，避免前一題影響後續測量。</div>
+      `;
+    } else {
+      if (q.type === "mcq") {
+        document.querySelectorAll(".choice").forEach(btn => {
+          const val = normalize(btn.dataset.value);
+          if (val === normalize(q.answer)) btn.classList.add("correct");
+          if (btn.classList.contains("selected") && !correct) btn.classList.add("incorrect");
+        });
+      }
+
+      if (nearMiss) {
+        feedback.className = "feedback near";
+        feedback.innerHTML = `
+          <strong>接近，但還差一點</strong>
+          <div class="answer-note">${escapeHtml(nearMiss.feedback || "概念接近，但搭配或形式還需要調整。")}</div>
+          <div class="answer-note">建議答案：${escapeHtml(q.answer)}</div>
+          ${q.example ? `<div class="example">${escapeHtml(q.example)}</div>` : ""}
+        `;
+      } else {
+        feedback.className = `feedback ${correct ? "correct" : "incorrect"}`;
+        feedback.innerHTML = `
+          <strong>${correct ? "答對了" : `正確答案：${escapeHtml(q.answer)}`}</strong>
+          <div class="answer-note">${escapeHtml(q.note || "")}</div>
+          ${q.example ? `<div class="example">${escapeHtml(q.example)}</div>` : ""}
+        `;
+      }
+    }
+
     $("submitBtn").classList.add("hidden");
     $("nextBtn").classList.remove("hidden");
     updateDashboard();
@@ -198,21 +245,27 @@
     const groups = new Map();
     attempts.forEach(a => {
       [
-        [`skill:${a.skill}`, a.skill],
-        [`category:${a.category}`, a.category],
-        [`knowledge:${a.knowledge}`, a.knowledge],
-        [`cefr:${a.cefr}`, `${a.cefr} overall`]
-      ].forEach(([key,label]) => {
-        if (!groups.has(key)) groups.set(key, { label, total:0, correct:0, ms:0 });
+        [`skill:${a.skill}`, a.skill, "skill"],
+        [`category:${a.category}`, a.category, "category"],
+        [`knowledge:${a.knowledge}`, a.knowledge, "knowledge"],
+        [`cefr:${a.cefr}`, `${a.cefr} overall`, "cefr"]
+      ].forEach(([key,label,groupType]) => {
+        if (!groups.has(key)) groups.set(key, { label, groupType, total:0, correct:0, ms:0 });
         const g = groups.get(key);
         g.total += 1;
         if (a.correct) g.correct += 1;
         g.ms += a.responseMs;
       });
     });
+
     return [...groups.values()]
-      .filter(g => g.total >= 2)
-      .map(g => ({ ...g, accuracy: g.correct / g.total, avgMs: g.ms / g.total }))
+      .filter(g => g.groupType === "knowledge" ? (g.total >= 1 && g.correct < g.total) : g.total >= 2)
+      .map(g => ({
+        ...g,
+        accuracy: g.correct / g.total,
+        avgMs: g.ms / g.total,
+        evidence: g.total >= 3 ? "moderate" : "early"
+      }))
       .sort((a,b) => a.accuracy - b.accuracy || b.total - a.total);
   };
 
@@ -244,7 +297,7 @@
       $("weaknessList").className = "weakness-list";
       $("weaknessList").innerHTML = weaknesses.map(g => `
         <div class="weak-row">
-          <div><strong>${escapeHtml(g.label)}</strong><small>${g.correct}/${g.total} correct · avg ${(g.avgMs/1000).toFixed(1)}s</small></div>
+          <div><strong>${escapeHtml(g.label)}</strong><small>${g.correct}/${g.total} correct · avg ${(g.avgMs/1000).toFixed(1)}s · ${g.evidence === "early" ? "early signal" : "repeated signal"}</small></div>
           <div class="weak-score">${Math.round(g.accuracy*100)}%</div>
         </div>`).join("");
     }
@@ -255,11 +308,11 @@
     const correct = s.filter(a => a.correct).length;
     const accuracy = s.length ? correct / s.length : 0;
     $("sessionAccuracy").textContent = `${Math.round(accuracy * 100)}%`;
-    $("sessionSummary").textContent = `${correct} / ${s.length} correct`;
+    $("sessionSummary").textContent = `${correct} / ${s.length} correct${state.mode === "diagnostic" ? " · diagnostic" : ""}`;
 
     const weak = aggregateWeaknesses(s).filter(g => g.accuracy < .8).slice(0,4);
     $("sessionInsights").innerHTML = weak.length
-      ? weak.map(g => `<div class="insight"><strong>${escapeHtml(g.label)}</strong>：${Math.round(g.accuracy*100)}% correct，下一輪會提高相關題目的出現機率。</div>`).join("")
+      ? weak.map(g => `<div class="insight"><strong>${escapeHtml(g.label)}</strong>：${Math.round(g.accuracy*100)}% correct${g.evidence === "early" ? "（目前只是初步訊號）" : ""}。</div>`).join("")
       : `<div class="insight">這輪沒有明顯弱點。下一輪會增加主動回憶與較少出現的知識點。</div>`;
 
     showView($("resultView"));
@@ -269,12 +322,13 @@
   const exportAttempts = (onlySession = false) => {
     const attempts = onlySession ? state.sessionAttempts : loadAttempts();
     const payload = {
-      schemaVersion: 1,
+      schemaVersion: 2,
+      bankVersion: BANK_VERSION,
       exportedAt: new Date().toISOString(),
       summary: {
         attempts: attempts.length,
         correct: attempts.filter(a => a.correct).length,
-        weaknesses: aggregateWeaknesses(attempts).slice(0, 12)
+        weaknesses: aggregateWeaknesses(attempts).slice(0, 16)
       },
       attempts
     };
