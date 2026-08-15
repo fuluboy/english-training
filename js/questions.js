@@ -93,12 +93,10 @@
     const key = category.includes("Product Term") ? "noun" :
       (category.includes("Phrasal") || category.includes("Preposition") || term.includes(" ")) ? "phrase" : "word";
     const pool = groups[key].filter(x => x !== term);
-    const derived = [
-      pool[(i * 3 + 1) % pool.length],
-      pool[(i * 5 + 7) % pool.length],
-      pool[(i * 7 + 11) % pool.length]
-    ];
-    const distractors = distractorOverrides[term] || derived;
+    const preferred = distractorOverrides[term] || [];
+    const fallback = rotate(pool, `${code}-pool`);
+    const distractors = [...new Set([...preferred, ...fallback])].filter(x => x && x !== term).slice(0, 3);
+    if (distractors.length !== 3) throw new Error(`Unable to build three distractors for ${term}`);
     const options = seed => rotate([term, ...distractors], seed);
     const note = noteOverrides[term] || `${term} = ${zh}。常見搭配：${rawKnowledge}。`;
     const common = {
@@ -144,13 +142,15 @@
     const [code, knowledge, skill, note, examples] = rule;
     examples.forEach((e, i) => {
       const [context, prompt, answer, d1, d2, d3, example] = e;
+      const grammarOptions = rotate([answer, d1, d2, d3], `${code}${i}`);
+      if (grammarOptions.length !== 4) throw new Error(`Grammar question ${code}-${i + 1} needs four unique options`);
       grammarQuestions.push({
         id: `${code}-${i + 1}`,
         cefr: "B1",
         category: "Grammar",
         domain: /team|project|release|product|user|dashboard|client|api|roadmap|conversion|engineering|PM/i.test(context + " " + prompt) ? "Workplace" : "General",
         skill, type: "mcq", context, prompt,
-        options: rotate([answer, d1, d2, d3], `${code}${i}`),
+        options: grammarOptions,
         answer, knowledge, note, example, learningStage: i + 1
       });
     });
