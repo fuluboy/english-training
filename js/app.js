@@ -2,7 +2,7 @@
   const STORAGE_KEY = "english-training-attempts-v1";
   const DICT_CACHE_KEY = "english-training-dictionary-cache-v1";
   const SESSION_SIZE = 20;
-  const BANK_VERSION = window.QUESTION_META?.version || "stage1-500-v1";
+  const BANK_VERSION = window.QUESTION_META?.version || "stage1-500-v2";
   const bank = window.QUESTION_BANK || [];
 
   const $ = (id) => document.getElementById(id);
@@ -45,6 +45,20 @@
 
   const normalize = (value) => String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
 
+  const escapeHtml = (value) => String(value ?? "").replace(/[&<>'"]/g, c => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
+  }[c]));
+
+  const masteryCredit = (attempt) => {
+    if (Number.isFinite(attempt.masteryCredit)) return Math.max(0, Math.min(1, attempt.masteryCredit));
+    return attempt.correct ? 1 : 0;
+  };
+
+  const isExactTarget = (attempt) => {
+    if (typeof attempt.targetMatched === "boolean") return attempt.targetMatched;
+    return Boolean(attempt.correct);
+  };
+
   const groupByKnowledge = (items) => {
     const map = new Map();
     items.forEach(q => {
@@ -57,11 +71,11 @@
   const getQuestionStats = (attempts) => {
     const map = new Map();
     attempts.forEach(a => {
-      if (!map.has(a.questionId)) map.set(a.questionId, { total: 0, correct: 0, avgMs: 0 });
+      if (!map.has(a.questionId)) map.set(a.questionId, { total: 0, score: 0, avgMs: 0 });
       const s = map.get(a.questionId);
       s.avgMs = ((s.avgMs * s.total) + a.responseMs) / (s.total + 1);
       s.total += 1;
-      if (a.correct) s.correct += 1;
+      s.score += masteryCredit(a);
     });
     return map;
   };
@@ -69,11 +83,11 @@
   const getKnowledgeStats = (attempts) => {
     const map = new Map();
     attempts.forEach(a => {
-      if (!map.has(a.knowledge)) map.set(a.knowledge, { total: 0, correct: 0, avgMs: 0, lastAt: 0 });
+      if (!map.has(a.knowledge)) map.set(a.knowledge, { total: 0, score: 0, avgMs: 0, lastAt: 0 });
       const s = map.get(a.knowledge);
       s.avgMs = ((s.avgMs * s.total) + a.responseMs) / (s.total + 1);
       s.total += 1;
-      if (a.correct) s.correct += 1;
+      s.score += masteryCredit(a);
       s.lastAt = Math.max(s.lastAt, new Date(a.timestamp).getTime() || 0);
     });
     return map;
@@ -82,8 +96,8 @@
   const knowledgeWeight = (knowledge, stats) => {
     const s = stats.get(knowledge);
     if (!s) return 3.2;
-    const accuracy = s.correct / s.total;
-    const weaknessBoost = (1 - accuracy) * 5.2;
+    const mastery = s.score / s.total;
+    const weaknessBoost = (1 - mastery) * 5.2;
     const familiarityDecay = Math.min(s.total, 10) * 0.16;
     const daysSince = s.lastAt ? Math.max(0, (Date.now() - s.lastAt) / 86400000) : 0;
     const spacingBoost = Math.min(daysSince, 14) * 0.10;
@@ -92,21 +106,19 @@
 
   const chooseVariant = (questions, qStats) => {
     const ranked = [...questions].sort((a, b) => {
-      const sa = qStats.get(a.id) || { total: 0, correct: 0 };
-      const sb = qStats.get(b.id) || { total: 0, correct: 0 };
+      const sa = qStats.get(a.id) || { total: 0, score: 0 };
+      const sb = qStats.get(b.id) || { total: 0, score: 0 };
       if (sa.total !== sb.total) return sa.total - sb.total;
-      const aa = sa.total ? sa.correct / sa.total : 0;
-      const ab = sb.total ? sb.correct / sb.total : 0;
-      if (aa !== ab) return aa - ab;
+      const ma = sa.total ? sa.score / sa.total : 0;
+      const mb = sb.total ? sb.score / sb.total : 0;
+      if (ma !== mb) return ma - mb;
       return (a.learningStage || 1) - (b.learningStage || 1);
     });
-    const leastSeen = ranked[0]?.id;
-    const tied = ranked.filter(q => {
-      const sq = qStats.get(q.id) || { total: 0 };
-      const sl = qStats.get(leastSeen) || { total: 0 };
-      return sq.total === sl.total;
-    });
-    return shuffle(tied)[0] || ranked[0];
+    const first = ranked[0];
+    if (!first) return null;
+    const firstStats = qStats.get(first.id) || { total: 0 };
+    const tied = ranked.filter(q => (qStats.get(q.id) || { total: 0 }).total === firstStats.total);
+    return shuffle(tied)[0] || first;
   };
 
   const weightedKnowledgeSample = (items, size, attempts) => {
@@ -126,7 +138,8 @@
         if (r <= 0) break;
       }
       const group = pool.splice(Math.min(idx, pool.length - 1), 1)[0];
-      selected.push(chooseVariant(group.questions, qStats));
+      const variant = chooseVariant(group.questions, qStats);
+      if (variant) selected.push(variant);
     }
 
     return shuffle(selected);
@@ -187,10 +200,6 @@
       setTimeout(() => $("typingInput")?.focus(), 50);
     }
   };
-
-  function escapeHtml(value) {
-    return String(value ?? "").replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
-  }
 
   const getNearMiss = (q, rawAnswer) => {
     if (!q.nearMisses) return null;
@@ -289,8 +298,13 @@
     const rawAnswer = q.type === "mcq" ? state.selected : ($("typingInput")?.value || "");
     if (!rawAnswer || !normalize(rawAnswer)) return;
 
-    const accepted = (q.accepted || [q.answer]).map(normalize);
-    const correct = accepted.includes(normalize(rawAnswer));
+    const normalizedAnswer = normalize(rawAnswer);
+    const acceptedTargets = (q.accepted || [q.answer]).map(normalize);
+    const alternatives = (q.alternatives || []).map(normalize);
+    const targetMatched = acceptedTargets.includes(normalizedAnswer);
+    const acceptedAlternative = !targetMatched && alternatives.includes(normalizedAnswer);
+    const correct = targetMatched || acceptedAlternative;
+    const credit = targetMatched ? 1 : acceptedAlternative ? 0.5 : 0;
     const nearMiss = correct ? null : getNearMiss(q, rawAnswer);
     state.locked = true;
 
@@ -312,6 +326,10 @@
       answer: rawAnswer,
       correctAnswer: q.answer,
       correct,
+      targetMatched,
+      acceptedAlternative,
+      masteryCredit: credit,
+      resultType: targetMatched ? "target" : acceptedAlternative ? "acceptable-alternative" : nearMiss ? "near-miss" : "incorrect",
       errorType: correct ? null : (nearMiss?.type || "incorrect"),
       nearMiss: Boolean(nearMiss),
       responseMs
@@ -341,13 +359,25 @@
         });
       }
 
-      const statusHtml = nearMiss
-        ? `<strong>接近，但還差一點</strong>
-           <div class="answer-note">${escapeHtml(nearMiss.feedback || "概念接近，但搭配或形式還需要調整。")}</div>
-           <div class="answer-note">建議答案：${escapeHtml(q.answer)}</div>`
-        : `<strong>${correct ? "答對了" : `正確答案：${escapeHtml(q.answer)}`}</strong>`;
+      let statusHtml = "";
+      let feedbackClass = "incorrect";
+      if (targetMatched) {
+        feedbackClass = "correct";
+        statusHtml = "<strong>答對了</strong>";
+      } else if (acceptedAlternative) {
+        feedbackClass = "alternative";
+        statusHtml = `<strong>✓ 自然可接受的表達</strong>
+          <div class="answer-note">你寫的「${escapeHtml(rawAnswer)}」可以表達這個意思。本題目標詞是 <b>${escapeHtml(q.answer)}</b>；這個目標詞仍會在後續安排複習。</div>`;
+      } else if (nearMiss) {
+        feedbackClass = "near";
+        statusHtml = `<strong>接近，但還差一點</strong>
+          <div class="answer-note">${escapeHtml(nearMiss.feedback || "概念接近，但搭配或形式還需要調整。")}</div>
+          <div class="answer-note">建議答案：${escapeHtml(q.answer)}</div>`;
+      } else {
+        statusHtml = `<strong>正確答案：${escapeHtml(q.answer)}</strong>`;
+      }
 
-      feedback.className = `feedback ${nearMiss ? "near" : (correct ? "correct" : "incorrect")}`;
+      feedback.className = `feedback ${feedbackClass}`;
       feedback.innerHTML = `
         ${statusHtml}
         ${renderWordCard(q)}
@@ -378,23 +408,98 @@
         [`knowledge:${a.knowledge}`, a.knowledge, "knowledge"],
         [`cefr:${a.cefr}`, `${a.cefr} overall`, "cefr"]
       ].forEach(([key, label, groupType]) => {
-        if (!groups.has(key)) groups.set(key, { label, groupType, total: 0, correct: 0, ms: 0 });
+        if (!groups.has(key)) groups.set(key, {
+          label, groupType, total: 0, score: 0, exact: 0, successful: 0,
+          alternatives: 0, incorrect: 0, ms: 0
+        });
         const g = groups.get(key);
         g.total += 1;
-        if (a.correct) g.correct += 1;
+        g.score += masteryCredit(a);
+        g.exact += isExactTarget(a) ? 1 : 0;
+        g.successful += a.correct ? 1 : 0;
+        g.alternatives += a.acceptedAlternative ? 1 : 0;
+        g.incorrect += a.correct ? 0 : 1;
         g.ms += a.responseMs;
       });
     });
 
-    return [...groups.values()]
-      .filter(g => g.groupType === "knowledge" ? (g.total >= 1 && g.correct < g.total) : g.total >= 2)
-      .map(g => ({
-        ...g,
-        accuracy: g.correct / g.total,
-        avgMs: g.ms / g.total,
-        evidence: g.total >= 3 ? "moderate" : "early"
-      }))
-      .sort((a, b) => a.accuracy - b.accuracy || b.total - a.total);
+    return [...groups.values()].map(g => ({
+      ...g,
+      mastery: g.total ? g.score / g.total : 0,
+      accuracy: g.total ? g.successful / g.total : 0,
+      avgMs: g.total ? g.ms / g.total : 0,
+      evidence: g.total >= 3 ? "repeated" : "early"
+    }));
+  };
+
+  const confirmedWeaknesses = (attempts) => {
+    const priority = { category: 0, cefr: 1, skill: 2 };
+    const candidates = aggregateWeaknesses(attempts)
+      .filter(g => g.groupType !== "knowledge" && g.total >= 3 && g.mastery < .8)
+      .sort((a, b) => a.mastery - b.mastery || priority[a.groupType] - priority[b.groupType] || b.total - a.total);
+
+    const seen = new Set();
+    return candidates.filter(g => {
+      const signature = `${g.total}:${g.score.toFixed(2)}`;
+      if (seen.has(signature)) return false;
+      seen.add(signature);
+      return true;
+    });
+  };
+
+  const reviewItems = (attempts) => aggregateWeaknesses(attempts)
+    .filter(g => g.groupType === "knowledge" && g.mastery < 1)
+    .sort((a, b) => {
+      if (a.total !== b.total) return b.total - a.total;
+      return a.mastery - b.mastery || b.ms - a.ms;
+    });
+
+  const renderRadar = (attempts) => {
+    const confirmed = confirmedWeaknesses(attempts).slice(0, 5);
+    const reviews = reviewItems(attempts).slice(0, 8);
+    $("weakCount").textContent = confirmed.length;
+
+    if (!confirmed.length && !reviews.length) {
+      $("weaknessList").className = "weakness-list empty-state";
+      $("weaknessList").textContent = "目前還沒有明顯弱點；繼續累積作答資料。";
+      return;
+    }
+
+    const confirmedHtml = confirmed.length ? `
+      <div class="radar-block">
+        <div class="radar-title">已確認弱點 <span>至少 3 次資料才顯示百分比</span></div>
+        ${confirmed.map(g => `
+          <div class="weak-row">
+            <div><strong>${escapeHtml(g.label)}</strong><small>${g.exact}/${g.total} target · avg ${(g.avgMs / 1000).toFixed(1)}s · repeated signal</small></div>
+            <div class="weak-score">${Math.round(g.mastery * 100)}%</div>
+          </div>`).join("")}
+      </div>` : `
+      <div class="radar-block">
+        <div class="radar-title">已確認弱點</div>
+        <div class="radar-empty">目前樣本還不足以確認新的弱點。</div>
+      </div>`;
+
+    const reviewsHtml = reviews.length ? `
+      <div class="radar-block review-block">
+        <div class="radar-title">NEEDS REVIEW <span>單次錯題不再標成 0%</span></div>
+        ${reviews.map(g => {
+          let detail = "";
+          if (g.total === 1) {
+            detail = g.alternatives
+              ? "1 次可接受替代表達 · 目標詞待熟悉"
+              : "1 次答錯 · 待再次確認";
+          } else {
+            detail = `${g.exact}/${g.total} 次命中目標詞 · 掌握度 ${Math.round(g.mastery * 100)}%`;
+          }
+          return `<div class="weak-row review-row">
+            <div><strong>${escapeHtml(g.label)}</strong><small>${detail} · avg ${(g.avgMs / 1000).toFixed(1)}s</small></div>
+            <div class="review-badge">待複習</div>
+          </div>`;
+        }).join("")}
+      </div>` : "";
+
+    $("weaknessList").className = "weakness-list";
+    $("weaknessList").innerHTML = confirmedHtml + reviewsHtml;
   };
 
   const updateDashboard = () => {
@@ -410,37 +515,29 @@
       return;
     }
 
-    const correct = attempts.filter(a => a.correct).length;
+    const successful = attempts.filter(a => a.correct).length;
     const avgMs = attempts.reduce((s, a) => s + a.responseMs, 0) / attempts.length;
-    $("overallAccuracy").textContent = `${Math.round(correct / attempts.length * 100)}%`;
+    $("overallAccuracy").textContent = `${Math.round(successful / attempts.length * 100)}%`;
     $("avgResponse").textContent = `${(avgMs / 1000).toFixed(1)}s`;
     $("dataStatus").textContent = `${attempts.length} attempts`;
-
-    const weaknesses = aggregateWeaknesses(attempts).filter(g => g.accuracy < .8).slice(0, 6);
-    $("weakCount").textContent = weaknesses.length;
-    if (!weaknesses.length) {
-      $("weaknessList").className = "weakness-list empty-state";
-      $("weaknessList").textContent = "目前還沒有明顯弱點；繼續累積作答資料。";
-    } else {
-      $("weaknessList").className = "weakness-list";
-      $("weaknessList").innerHTML = weaknesses.map(g => `
-        <div class="weak-row">
-          <div><strong>${escapeHtml(g.label)}</strong><small>${g.correct}/${g.total} correct · avg ${(g.avgMs / 1000).toFixed(1)}s · ${g.evidence === "early" ? "early signal" : "repeated signal"}</small></div>
-          <div class="weak-score">${Math.round(g.accuracy * 100)}%</div>
-        </div>`).join("");
-    }
+    renderRadar(attempts);
   };
 
   const finishSession = () => {
     const s = state.sessionAttempts;
-    const correct = s.filter(a => a.correct).length;
-    const accuracy = s.length ? correct / s.length : 0;
+    const successful = s.filter(a => a.correct).length;
+    const accuracy = s.length ? successful / s.length : 0;
+    const alternatives = s.filter(a => a.acceptedAlternative).length;
     $("sessionAccuracy").textContent = `${Math.round(accuracy * 100)}%`;
-    $("sessionSummary").textContent = `${correct} / ${s.length} correct${state.mode === "diagnostic" ? " · diagnostic" : ""}`;
+    $("sessionSummary").textContent = `${successful} / ${s.length} effective${alternatives ? ` · ${alternatives} alternative` : ""}${state.mode === "diagnostic" ? " · diagnostic" : ""}`;
 
-    const weak = aggregateWeaknesses(s).filter(g => g.accuracy < .8).slice(0, 4);
-    $("sessionInsights").innerHTML = weak.length
-      ? weak.map(g => `<div class="insight"><strong>${escapeHtml(g.label)}</strong>：${Math.round(g.accuracy * 100)}% correct${g.evidence === "early" ? "（目前只是初步訊號）" : ""}。</div>`).join("")
+    const confirmed = confirmedWeaknesses(s).slice(0, 3);
+    const reviews = reviewItems(s).slice(0, 3);
+    const parts = [];
+    confirmed.forEach(g => parts.push(`<div class="insight"><strong>${escapeHtml(g.label)}</strong>：掌握度 ${Math.round(g.mastery * 100)}%，已出現重複訊號。</div>`));
+    reviews.forEach(g => parts.push(`<div class="insight"><strong>${escapeHtml(g.label)}</strong>：${g.total === 1 ? "這輪出現一次需要再確認的訊號" : `目標詞掌握度 ${Math.round(g.mastery * 100)}%`}。</div>`));
+    $("sessionInsights").innerHTML = parts.length
+      ? parts.join("")
       : `<div class="insight">這輪沒有明顯弱點。下一輪會增加主動回憶與較少出現的知識點。</div>`;
 
     showView($("resultView"));
@@ -450,14 +547,17 @@
   const exportAttempts = (onlySession = false) => {
     const attempts = onlySession ? state.sessionAttempts : loadAttempts();
     const payload = {
-      schemaVersion: 3,
+      schemaVersion: 4,
       bankVersion: BANK_VERSION,
       questionBank: window.QUESTION_META || null,
       exportedAt: new Date().toISOString(),
       summary: {
         attempts: attempts.length,
-        correct: attempts.filter(a => a.correct).length,
-        weaknesses: aggregateWeaknesses(attempts).slice(0, 20)
+        effective: attempts.filter(a => a.correct).length,
+        exactTarget: attempts.filter(a => isExactTarget(a)).length,
+        acceptableAlternatives: attempts.filter(a => a.acceptedAlternative).length,
+        confirmedWeaknesses: confirmedWeaknesses(attempts).slice(0, 12),
+        needsReview: reviewItems(attempts).slice(0, 20)
       },
       attempts
     };

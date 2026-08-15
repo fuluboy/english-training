@@ -42,6 +42,13 @@
     "deal with": "deal with 必須保留 with；只寫 deal the issue 不完整。",
     "point out": "point out + 內容；常用來指出問題、風險或事實。",
     "find out": "find out 強調取得未知資訊；常接 why / whether / what。",
+    "carry out": "carry out 常和 research / test / plan / task 搭配；conduct research 也是自然替代表達。",
+    "follow up": "follow up 表示在先前互動之後繼續追蹤或聯繫。",
+    "take part in": "take part in = 參與活動或事件。join / participate in 在合適語境也可以表達『參與』；本題仍會幫你熟悉 take part in 這個片語。",
+    "make sure": "make sure = 確認、確保；ensure 是較正式的常見替代表達。",
+    "set up": "set up 常表示建立、配置或安排到可使用的狀態。",
+    "work on": "work on = 花時間處理、開發或改善某件事。",
+    "lead to": "lead to = 導致；cause / result in 在合適語境可能是自然替代表達。",
     "result from": "result from = 原因在後面；result in = 結果在後面。",
     "instead of": "instead of 後接名詞或 V-ing。",
     "prioritize": "prioritize 常搭配 features / tasks / problems / requirements，表示依價值、風險或資源決定先後。",
@@ -50,7 +57,7 @@
     "mitigate": "mitigate risk 不表示完全消除風險，而是降低發生機率或影響。",
     "measure": "measure impact / performance / outcome；重點是取得可比較的數值。",
     "monitor": "monitor 強調持續觀察一段時間；measure 更偏向量化某個結果。",
-    "identify": "identify = 找出「是什麼」；investigate = 深入查原因與細節。",
+    "identify": "identify = 找出『是什麼』；investigate = 深入查原因與細節。",
     "dependency": "dependency = 某項工作取決於另一件事或另一團隊的產出。",
     "assumption": "assumption 是暫時視為成立的前提；重要假設應該被驗證。",
     "constraint": "constraint 常見於 time / budget / technical / resource constraints。",
@@ -75,6 +82,57 @@
     "address": ["handle", "solve", "deal with"],
     "assumption": ["dependency", "hypothesis", "constraint"],
     "monitor": ["measure", "evaluate", "track"]
+  };
+
+  const alternativeAnswerMap = {
+    "prevent": ["stop"],
+    "suggest": ["propose"],
+    "recommend": ["advise"],
+    "provide": ["supply"],
+    "improve": ["enhance", "make better"],
+    "increase": ["raise", "boost"],
+    "reduce": ["decrease", "lower"],
+    "solve": ["resolve"],
+    "handle": ["deal with", "address", "tackle"],
+    "support": ["back"],
+    "compare": ["contrast"],
+    "choose": ["select"],
+    "require": ["need"],
+    "allow": ["permit", "enable"],
+    "expect": ["anticipate"],
+    "achieve": ["accomplish", "attain", "reach"],
+    "focus on": ["concentrate on"],
+    "depend on": ["rely on"],
+    "deal with": ["handle", "address", "tackle"],
+    "point out": ["highlight"],
+    "find out": ["discover", "determine"],
+    "carry out": ["conduct", "perform"],
+    "follow up": ["check back"],
+    "take part in": ["join", "participate in", "be involved in"],
+    "make sure": ["ensure"],
+    "set up": ["establish", "configure"],
+    "lead to": ["cause", "result in"],
+    "result from": ["stem from", "be caused by"],
+    "instead of": ["rather than"],
+    "address": ["handle", "deal with", "tackle"],
+    "validate": ["verify", "test"],
+    "evaluate": ["assess"],
+    "estimate": ["approximate"],
+    "launch": ["release"],
+    "monitor": ["track"],
+    "measure": ["quantify"],
+    "mitigate": ["reduce"],
+    "identify": ["find"],
+    "investigate": ["look into", "examine"],
+    "analyze": ["analyse", "examine"],
+    "define": ["specify"],
+    "constraint": ["limitation"],
+    "outcome": ["result"],
+    "root cause": ["underlying cause"],
+    "scope": ["range"],
+    "requirement": ["need"],
+    "evidence": ["proof"],
+    "impact": ["effect"]
   };
 
   const groups = {};
@@ -103,6 +161,7 @@
       cefr, category, domain, knowledge, word: term, dictionaryWord,
       meaningZh: zh, definitionEn, note
     };
+    const alternatives = alternativeAnswerMap[term] || [];
 
     const contextualPrompt = (example) => hasTerm(example, term)
       ? blank(example, term)
@@ -121,17 +180,17 @@
       },
       {
         ...common, id: `${code}-C`, skill: "Productive", category: "Active Recall", type: "typing", learningStage: 3,
-        context: "中文 → 英文主動回憶。請輸入目標單字或片語。",
-        prompt: `「${zh}」\n_____`, answer: term, accepted: [term], example: ex1
+        context: "中文 → 英文主動回憶。自然且意思相符的替代表達也可接受；系統仍會保留本題目標詞供後續複習。",
+        prompt: `「${zh}」\n_____`, answer: term, accepted: [term], alternatives, example: ex1
       },
       {
         ...common, id: `${code}-D`, skill: "Productive", category: "Active Recall", type: "typing", learningStage: 4,
-        context: "Definition → word / phrase. Try to retrieve it without choices.",
-        prompt: definitionEn, answer: term, accepted: [term], example: ex2
+        context: "Definition → word / phrase. Natural equivalent expressions are accepted; the target expression will still be reviewed later.",
+        prompt: definitionEn, answer: term, accepted: [term], alternatives, example: ex2
       },
       {
         ...common, id: `${code}-E`, skill: "Meaning discrimination", type: "mcq", learningStage: 5,
-        context: "Choose the most precise English expression.",
+        context: "Choose the most precise English expression for this learning target.",
         prompt: `Which option best matches 「${zh}」?`, options: options(`${code}E`), answer: term, example: ex1
       }
     );
@@ -163,9 +222,16 @@
     "B1-LEX-028-D": {
       "deal": { type: "missing-preposition", feedback: "deal 的方向正確，但這個片語必須是 deal with。" }
     },
+    "B1-LEX-033-C": {
+      "involve": { type: "word-form", feedback: "involve 本身通常需要受詞，例如 involve users。若要說『自己參與』，可用 be involved in；join / participate in 也可能是自然表達。" },
+      "involved in": { type: "missing-auxiliary", feedback: "方向正確；完整片語通常是 be involved in。" }
+    },
+    "B1-LEX-033-D": {
+      "involve": { type: "word-form", feedback: "involve 本身通常需要受詞，例如 involve users。若要說『自己參與』，可用 be involved in。" },
+      "involved in": { type: "missing-auxiliary", feedback: "方向正確；完整片語通常是 be involved in。" }
+    },
     "B1-LEX-040-C": {
-      "deal": { type: "word-choice", feedback: "deal 需要 with；若題目要求一個可直接接 issue 的動詞，可用 address。" },
-      "deal with": { type: "synonym", feedback: "deal with 語意可以，但這一輪正在訓練 address an issue。" }
+      "deal": { type: "word-choice", feedback: "deal 需要 with；若題目要求一個可直接接 issue 的動詞，可用 address。" }
     },
     "B2-PM-042-C": {
       "assume": { type: "concept-confusion", feedback: "assume = 假定；validate = 用證據驗證假設。" },
@@ -177,7 +243,7 @@
 
   window.QUESTION_BANK = [...lexicalQuestions, ...grammarQuestions];
   window.QUESTION_META = {
-    version: "stage1-500-v1",
+    version: "stage1-500-v2",
     total: window.QUESTION_BANK.length,
     lexical: lexicalQuestions.length,
     grammar: grammarQuestions.length,
