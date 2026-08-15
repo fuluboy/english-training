@@ -1,309 +1,186 @@
-window.QUESTION_BANK = [
-  {
-    id: "B1-COL-001",
-    cefr: "B1",
-    category: "Collocation",
-    domain: "Workplace",
-    skill: "Recognition",
-    type: "mcq",
-    context: "Your manager gives you a task, but two requirements are unclear.",
-    prompt: "Before starting the work, you should _____ the requirements with your manager.",
-    options: ["clarify", "confirm", "estimate", "review"],
-    answer: "clarify",
-    knowledge: "clarify requirements",
-    note: "clarify requirements = 把不清楚的需求釐清到可以執行。confirm 比較偏確認既有資訊是否正確。",
-    example: "I clarified the requirements before asking the team to estimate the work."
-  },
-  {
-    id: "B1-GRA-002",
-    cefr: "B1",
-    category: "Grammar",
-    domain: "Workplace",
-    skill: "Tense",
-    type: "mcq",
-    context: "You are describing a project that finished last month.",
-    prompt: "We _____ the main cause of the drop-off by reviewing the session recordings.",
-    options: ["identified", "identify", "have identified", "were identifying"],
-    answer: "identified",
-    knowledge: "past tense in project stories",
-    note: "已完成的專案案例通常要穩定使用過去式。",
-    example: "We identified the main cause and simplified the flow."
-  },
-  {
-    id: "B1-VOC-003",
-    cefr: "B1",
-    category: "Vocabulary",
-    domain: "General",
-    skill: "Recognition",
-    type: "mcq",
-    context: "You may forget to submit a document before the deadline.",
-    prompt: "Could you _____ me tomorrow if I haven't sent the document yet?",
-    options: ["remind", "remember", "notice", "inform"],
-    answer: "remind",
-    knowledge: "remind someone",
-    note: "remind + 人 = 提醒某人記得做某事；remember = 自己記得。",
-    example: "Please remind me to send the file tomorrow."
-  },
-  {
-    id: "B2-PM-004",
-    cefr: "B2",
-    category: "Vocabulary",
-    domain: "Product Management",
-    skill: "Recognition",
-    type: "mcq",
-    context: "The team has four possible features but only enough engineering capacity to build one this sprint.",
-    prompt: "The PM needs to _____ the feature that creates the most value for users.",
-    options: ["prioritize", "validate", "scope", "evaluate"],
-    answer: "prioritize",
-    knowledge: "prioritize a feature",
-    note: "prioritize = 決定什麼應該先做。",
-    example: "We prioritized the feature that addressed the largest user pain point."
-  },
-  {
-    id: "B2-PM-005",
-    cefr: "B2",
-    category: "Collocation",
-    domain: "Product Management",
-    skill: "Recognition",
-    type: "mcq",
-    context: "A new onboarding idea looks promising, but the team has not tested whether users actually need it.",
-    prompt: "Before investing more resources, we should _____ the assumption with user research.",
-    options: ["validate", "verify", "evaluate", "confirm"],
-    answer: "validate",
-    knowledge: "validate an assumption",
-    note: "validate an assumption = 用研究或數據證據驗證假設。",
-    example: "We validated the assumption with five user interviews."
-  },
-  {
-    id: "B1-GRA-006",
-    cefr: "B1",
-    category: "Grammar",
-    domain: "General",
-    skill: "Preposition",
-    type: "mcq",
-    context: "A release was postponed because a payment service stopped working.",
-    prompt: "The release was delayed _____ a technical issue.",
-    options: ["because of", "because", "due", "although"],
-    answer: "because of",
-    knowledge: "because of + noun",
-    note: "because of 後面接名詞；because 後面接完整子句。",
-    example: "The launch was delayed because of a technical issue."
-  },
-  {
-    id: "B1-COL-007",
-    cefr: "B1",
-    category: "Collocation",
-    domain: "Workplace",
-    skill: "Recognition",
-    type: "mcq",
-    context: "A customer reports a recurring checkout error. You have several possible fixes, but first the problem itself must be dealt with.",
-    prompt: "The team needs to _____ the issue before the next release.",
-    options: ["address", "investigate", "resolve", "escalate"],
-    answer: "address",
-    knowledge: "address an issue",
-    note: "address an issue = 著手處理問題。resolve 表示已把問題解決；investigate 偏調查原因。",
-    example: "We addressed the issue by simplifying the validation logic."
-  },
-  {
-    id: "B2-PM-008",
-    cefr: "B2",
-    category: "Vocabulary",
-    domain: "Product Management",
-    skill: "Recognition",
-    type: "mcq",
-    context: "Design and engineering disagree on scope. The PM is trying to get both teams to commit to the same realistic direction before development starts.",
-    prompt: "The PM should help both teams _____ on a realistic solution.",
-    options: ["align", "agree", "settle", "focus"],
-    answer: "align",
-    knowledge: "align on a solution",
-    note: "align on = 跨角色對同一方向形成共識。agree 也有接近意思，但職場上 align on 更強調跨團隊對齊。",
-    example: "We aligned on a smaller scope for the first release."
-  },
-  {
-    id: "B1-ACT-009",
-    cefr: "B1",
-    category: "Active Recall",
-    domain: "Workplace",
-    skill: "Productive",
-    type: "typing",
-    context: "請輸入最自然的英文動詞。",
-    prompt: "「釐清需求」\n_____ the requirements",
-    answer: "clarify",
-    accepted: ["clarify"],
-    knowledge: "clarify requirements",
-    note: "把 clarify 與 requirements 綁在一起記。",
-    example: "First, I clarified the requirements with the sales team."
-  },
-  {
-    id: "B2-ACT-010",
-    cefr: "B2",
-    category: "Active Recall",
-    domain: "Product Management",
-    skill: "Productive",
-    type: "typing",
-    context: "請輸入最自然的英文動詞。",
-    prompt: "「驗證假設」\n_____ the assumption",
-    answer: "validate",
-    accepted: ["validate"],
-    knowledge: "validate an assumption",
-    nearMisses: {
-      "presume": { type: "semantic-near-miss", feedback: "presume 是『假定、認為某件事大概成立』；這裡要表達的是用證據去驗證假設，因此用 validate。" },
-      "assume": { type: "semantic-near-miss", feedback: "assume 是『先假設』；validate 是『用證據驗證』。這兩個動作在產品流程中通常一前一後。" }
-    },
-    note: "這是 Product / PM 很常用的搭配。",
-    example: "We validated the assumption before building the feature."
-  },
-  {
-    id: "B1-GRA-011",
-    cefr: "B1",
-    category: "Grammar",
-    domain: "Workplace",
-    skill: "Subject-verb agreement",
-    type: "mcq",
-    context: "You are describing a current product metric.",
-    prompt: "The data _____ that most users leave during the verification step.",
-    options: ["shows", "show", "showing", "has show"],
-    answer: "shows",
-    knowledge: "subject-verb agreement",
-    note: "在一般商務英文裡，data 常被當成整體資料集合，使用 shows 很常見。",
-    example: "The data shows that most users leave at this step."
-  },
-  {
-    id: "B1-GRA-012",
-    cefr: "B1",
-    category: "Grammar",
-    domain: "General",
-    skill: "Article",
-    type: "mcq",
-    context: "You are introducing one checkout problem for the first time.",
-    prompt: "We found _____ issue in the checkout flow.",
-    options: ["an", "a", "the", "no article"],
-    answer: "an",
-    knowledge: "article before singular countable noun",
-    note: "單數可數名詞第一次提到通常要 a/an；issue 以母音音素開頭。",
-    example: "We found an issue in the checkout flow."
-  },
-  {
-    id: "B1-PHR-013",
-    cefr: "B1",
-    category: "Phrasal Verb",
-    domain: "Workplace",
-    skill: "Recognition",
-    type: "mcq",
-    context: "A problem appears during a live demo. You need to manage the immediate situation first, then investigate the root cause after the meeting.",
-    prompt: "I can _____ the issue first and investigate the root cause after the meeting.",
-    options: ["deal with", "point out", "follow up on", "look into"],
-    answer: "deal with",
-    knowledge: "deal with an issue",
-    note: "deal with = 處理眼前情況。look into 偏調查；follow up on 偏後續追蹤。",
-    example: "I dealt with the urgent issue first, then investigated the cause."
-  },
-  {
-    id: "B2-PM-014",
-    cefr: "B2",
-    category: "Vocabulary",
-    domain: "Product Management",
-    skill: "Recognition",
-    type: "mcq",
-    context: "The team wants evidence about whether a redesigned flow actually improved conversion after launch.",
-    prompt: "We should _____ the impact for at least two weeks before making another change.",
-    options: ["measure", "monitor", "evaluate", "review"],
-    answer: "measure",
-    knowledge: "measure impact",
-    note: "measure impact = 把成效量化。monitor 偏持續觀察；evaluate 偏整體評估。",
-    example: "We measured the impact after launch and saw a 12% improvement."
-  },
-  {
-    id: "B2-PM-015",
-    cefr: "B2",
-    category: "Vocabulary",
-    domain: "Product Management",
-    skill: "Recognition",
-    type: "mcq",
-    context: "A release has several known risks. You cannot remove all of them, but you can reduce their likelihood or impact.",
-    prompt: "The team created a rollback plan to _____ the release risk.",
-    options: ["mitigate", "manage", "avoid", "resolve"],
-    answer: "mitigate",
-    knowledge: "mitigate risk",
-    note: "mitigate risk = 降低風險發生機率或影響程度。",
-    example: "We added a rollback plan to mitigate the release risk."
-  },
-  {
-    id: "B1-ACT-016",
-    cefr: "B1",
-    category: "Active Recall",
-    domain: "Workplace",
-    skill: "Productive",
-    type: "typing",
-    context: "請輸入能直接放進空格的自然英文。",
-    prompt: "「處理這個問題」\n_____ the issue",
-    answer: "address",
-    accepted: ["address", "handle"],
-    nearMisses: {
-      "deal": { type: "missing-preposition", feedback: "deal 的意思方向是對的，但這個片語要完整寫成 deal with the issue。這題空格只能放一個能直接接 the issue 的動詞，所以 address / handle 才能直接放入。" }
-    },
-    knowledge: "address an issue",
-    note: "address / handle 都可以直接接 issue；deal 需要 with。",
-    example: "We addressed the issue in the next release."
-  },
-  {
-    id: "B1-GRA-017",
-    cefr: "B1",
-    category: "Grammar",
-    domain: "General",
-    skill: "Conditionals",
-    type: "mcq",
-    context: "You are describing what you would do differently in a hypothetical future project.",
-    prompt: "If I _____ the project again, I would involve users earlier.",
-    options: ["did", "do", "would do", "had done"],
-    answer: "did",
-    knowledge: "second conditional",
-    note: "If + past simple, would + verb 用來描述假設情境。",
-    example: "If I did the project again, I would involve users earlier."
-  },
-  {
-    id: "B2-PM-018",
-    cefr: "B2",
-    category: "Collocation",
-    domain: "Product Management",
-    skill: "Recognition",
-    type: "mcq",
-    context: "Your team cannot complete the release until another platform team finishes an API first.",
-    prompt: "That API delivery is a key _____ for our release plan.",
-    options: ["dependency", "assumption", "constraint", "trade-off"],
-    answer: "dependency",
-    knowledge: "project dependency",
-    note: "dependency = 你的工作能否進行取決於另一件事或另一個團隊。constraint 是限制條件；assumption 是尚待驗證的假設。",
-    example: "We identified the API integration as a key dependency."
-  },
-  {
-    id: "B2-ACT-019",
-    cefr: "B2",
-    category: "Active Recall",
-    domain: "Product Management",
-    skill: "Productive",
-    type: "typing",
-    context: "請輸入最自然的英文動詞。",
-    prompt: "「衡量成效」\n_____ the impact",
-    answer: "measure",
-    accepted: ["measure"],
-    knowledge: "measure impact",
-    note: "描述 Result 時，measure 是需要能主動叫出的核心動詞。",
-    example: "We measured the impact after launch."
-  },
-  {
-    id: "B1-VOC-020",
-    cefr: "B1",
-    category: "Vocabulary",
-    domain: "General",
-    skill: "Recognition",
-    type: "mcq",
-    context: "You want to be present at a workshop next Friday as a participant.",
-    prompt: "I plan to _____ the workshop next Friday.",
-    options: ["attend", "join", "participate", "visit"],
-    answer: "attend",
-    knowledge: "attend an event",
-    note: "attend + meeting/workshop/event；不需要介系詞。participate 通常要搭配 in。",
-    example: "I attended the workshop last Friday."
+(() => {
+  const lexicalTargets = [...(window.LEXICAL_SEEDS || [])];
+
+  const withoutOnTime = lexicalTargets.filter(t => t[4] !== "on time");
+  withoutOnTime.push([
+    "B1-LEX-040","B1","Collocation","Workplace","address","處理、著手解決",
+    "take action to deal with a problem, concern, or need",
+    "address an issue",
+    "We need to address the issue before the next release.",
+    "The roadmap update addresses the biggest concern raised by the sales team.",
+    "address"
+  ]);
+
+  const L = withoutOnTime;
+  const G = window.GRAMMAR_SEEDS || [];
+
+  const hash = s => [...String(s)].reduce((n, c) => ((n * 31) + c.charCodeAt(0)) >>> 0, 7);
+  const rotate = (values, seed) => {
+    const unique = [...new Set(values)];
+    const offset = unique.length ? hash(seed) % unique.length : 0;
+    return unique.slice(offset).concat(unique.slice(0, offset));
+  };
+  const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const hasTerm = (sentence, term) => new RegExp(esc(term), "i").test(sentence);
+  const blank = (sentence, term) => sentence.replace(new RegExp(esc(term), "i"), "_____");
+
+  const canonicalKnowledge = {
+    "clarify the requirements": "clarify requirements"
+  };
+
+  const noteOverrides = {
+    "clarify": "clarify 常和 requirements / expectations / roles 搭配，重點是把模糊處說清楚。",
+    "remind": "remind + 人 + about/to；remember 表示自己記得，兩者不要混用。",
+    "attend": "attend 後面直接接 meeting / workshop / event，通常不需要介系詞。",
+    "avoid": "avoid 後面常接名詞或 V-ing，例如 avoid delays / avoid making mistakes。",
+    "suggest": "suggest 可接 V-ing 或 that 子句；一般不說 suggest to do。",
+    "recommend": "recommend 可接名詞或 V-ing；recommend doing 比 recommend to do 自然。",
+    "explain": "explain something to someone；不要說 explain me something。",
+    "discuss": "discuss 後直接接主題，一般不說 discuss about the issue。",
+    "focus on": "focus on + 名詞/V-ing，介系詞 on 不可省略。",
+    "depend on": "depend on + 名詞；第三人稱單數要用 depends on。",
+    "deal with": "deal with 必須保留 with；只寫 deal the issue 不完整。",
+    "point out": "point out + 內容；常用來指出問題、風險或事實。",
+    "find out": "find out 強調取得未知資訊；常接 why / whether / what。",
+    "result from": "result from = 原因在後面；result in = 結果在後面。",
+    "instead of": "instead of 後接名詞或 V-ing。",
+    "prioritize": "prioritize 常搭配 features / tasks / problems / requirements，表示依價值、風險或資源決定先後。",
+    "validate": "validate an assumption / hypothesis = 用證據確認假設是否成立。",
+    "align": "align on + 方向/方案；align with + 目標/策略。",
+    "mitigate": "mitigate risk 不表示完全消除風險，而是降低發生機率或影響。",
+    "measure": "measure impact / performance / outcome；重點是取得可比較的數值。",
+    "monitor": "monitor 強調持續觀察一段時間；measure 更偏向量化某個結果。",
+    "identify": "identify = 找出「是什麼」；investigate = 深入查原因與細節。",
+    "dependency": "dependency = 某項工作取決於另一件事或另一團隊的產出。",
+    "assumption": "assumption 是暫時視為成立的前提；重要假設應該被驗證。",
+    "constraint": "constraint 常見於 time / budget / technical / resource constraints。",
+    "trade-off": "trade-off 強調兩個目標無法同時最大化，需要做選擇。",
+    "metric": "metric 是可量化指標；使用前要先定義它代表哪個產品或商業結果。",
+    "outcome": "outcome 聚焦最後產生的改變；output 只是產出物。",
+    "friction": "friction 常指讓使用者變慢、困惑或放棄的阻力。",
+    "bottleneck": "bottleneck 是限制整體流速或產能的關鍵環節。",
+    "root cause": "root cause 是問題背後真正造成事件發生的原因。",
+    "pain point": "pain point 是具體困擾或阻礙，最好能用研究或數據證明。",
+    "hypothesis": "hypothesis 應該可以被測試與證偽；比一般 assumption 更適合實驗驗證。",
+    "address": "address an issue = 著手處理問題；語氣比 fix 更廣，也很適合面試敘述。"
+  };
+
+  const distractorOverrides = {
+    "validate": ["assume", "evaluate", "verify"],
+    "dependency": ["assumption", "constraint", "metric"],
+    "align": ["launch", "coordinate", "prioritize"],
+    "measure": ["monitor", "evaluate", "estimate"],
+    "mitigate": ["avoid", "monitor", "resolve"],
+    "deal with": ["point out", "follow up", "focus on"],
+    "address": ["handle", "solve", "deal with"],
+    "assumption": ["dependency", "hypothesis", "constraint"],
+    "monitor": ["measure", "evaluate", "track"]
+  };
+
+  const groups = {};
+  for (const t of L) {
+    const category = t[2];
+    const term = t[4];
+    const key = category.includes("Product Term") ? "noun" :
+      (category.includes("Phrasal") || category.includes("Preposition") || term.includes(" ")) ? "phrase" : "word";
+    (groups[key] ??= []).push(term);
   }
-];
+
+  const lexicalQuestions = [];
+  L.forEach((t, i) => {
+    const [code, cefr, category, domain, term, zh, definitionEn, rawKnowledge, ex1, ex2, dictionaryWord] = t;
+    const knowledge = canonicalKnowledge[rawKnowledge] || rawKnowledge;
+    const key = category.includes("Product Term") ? "noun" :
+      (category.includes("Phrasal") || category.includes("Preposition") || term.includes(" ")) ? "phrase" : "word";
+    const pool = groups[key].filter(x => x !== term);
+    const derived = [
+      pool[(i * 3 + 1) % pool.length],
+      pool[(i * 5 + 7) % pool.length],
+      pool[(i * 7 + 11) % pool.length]
+    ];
+    const distractors = distractorOverrides[term] || derived;
+    const options = seed => rotate([term, ...distractors], seed);
+    const note = noteOverrides[term] || `${term} = ${zh}。常見搭配：${rawKnowledge}。`;
+    const common = {
+      cefr, category, domain, knowledge, word: term, dictionaryWord,
+      meaningZh: zh, definitionEn, note
+    };
+
+    const contextualPrompt = (example) => hasTerm(example, term)
+      ? blank(example, term)
+      : `Complete the natural collocation:\n${blank(rawKnowledge, term)}`;
+
+    lexicalQuestions.push(
+      {
+        ...common, id: `${code}-A`, skill: "Recognition", type: "mcq", learningStage: 1,
+        context: "Choose the word or phrase that makes the sentence most natural.",
+        prompt: contextualPrompt(ex1), options: options(`${code}A`), answer: term, example: ex1
+      },
+      {
+        ...common, id: `${code}-B`, skill: "Recognition in context", type: "mcq", learningStage: 2,
+        context: "Read the situation carefully; the alternatives are intentionally related.",
+        prompt: contextualPrompt(ex2), options: options(`${code}B`), answer: term, example: ex2
+      },
+      {
+        ...common, id: `${code}-C`, skill: "Productive", category: "Active Recall", type: "typing", learningStage: 3,
+        context: "中文 → 英文主動回憶。請輸入目標單字或片語。",
+        prompt: `「${zh}」\n_____`, answer: term, accepted: [term], example: ex1
+      },
+      {
+        ...common, id: `${code}-D`, skill: "Productive", category: "Active Recall", type: "typing", learningStage: 4,
+        context: "Definition → word / phrase. Try to retrieve it without choices.",
+        prompt: definitionEn, answer: term, accepted: [term], example: ex2
+      },
+      {
+        ...common, id: `${code}-E`, skill: "Meaning discrimination", type: "mcq", learningStage: 5,
+        context: "Choose the most precise English expression.",
+        prompt: `Which option best matches 「${zh}」?`, options: options(`${code}E`), answer: term, example: ex1
+      }
+    );
+  });
+
+  const grammarQuestions = [];
+  G.forEach(rule => {
+    const [code, knowledge, skill, note, examples] = rule;
+    examples.forEach((e, i) => {
+      const [context, prompt, answer, d1, d2, d3, example] = e;
+      grammarQuestions.push({
+        id: `${code}-${i + 1}`,
+        cefr: "B1",
+        category: "Grammar",
+        domain: /team|project|release|product|user|dashboard|client|api|roadmap|conversion|engineering|PM/i.test(context + " " + prompt) ? "Workplace" : "General",
+        skill, type: "mcq", context, prompt,
+        options: rotate([answer, d1, d2, d3], `${code}${i}`),
+        answer, knowledge, note, example, learningStage: i + 1
+      });
+    });
+  });
+
+  const nearMissMap = {
+    "B1-LEX-028-C": {
+      "deal": { type: "missing-preposition", feedback: "deal 的方向正確，但這個片語必須是 deal with。" }
+    },
+    "B1-LEX-028-D": {
+      "deal": { type: "missing-preposition", feedback: "deal 的方向正確，但這個片語必須是 deal with。" }
+    },
+    "B1-LEX-040-C": {
+      "deal": { type: "word-choice", feedback: "deal 需要 with；若題目要求一個可直接接 issue 的動詞，可用 address。" },
+      "deal with": { type: "synonym", feedback: "deal with 語意可以，但這一輪正在訓練 address an issue。" }
+    },
+    "B2-PM-042-C": {
+      "assume": { type: "concept-confusion", feedback: "assume = 假定；validate = 用證據驗證假設。" },
+      "presume": { type: "concept-confusion", feedback: "presume = 假定；validate = 用證據驗證假設。" },
+      "persume": { type: "spelling-and-concept", feedback: "你可能想到 presume（假定）；這題需要 validate（驗證）。" }
+    }
+  };
+  lexicalQuestions.forEach(q => { if (nearMissMap[q.id]) q.nearMisses = nearMissMap[q.id]; });
+
+  window.QUESTION_BANK = [...lexicalQuestions, ...grammarQuestions];
+  window.QUESTION_META = {
+    version: "stage1-500-v1",
+    total: window.QUESTION_BANK.length,
+    lexical: lexicalQuestions.length,
+    grammar: grammarQuestions.length,
+    knowledgePoints: new Set(window.QUESTION_BANK.map(q => q.knowledge)).size
+  };
+})();
