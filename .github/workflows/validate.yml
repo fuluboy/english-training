@@ -1,0 +1,21 @@
+name: Validate English Training
+
+on:
+  pull_request:
+  push:
+    branches-ignore: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Validate JavaScript and question bank
+        run: |
+          node --check js/app.js
+          node --check js/questions.js
+          node scripts/smoke-test.js

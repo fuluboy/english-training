@@ -1,0 +1,9 @@
+{
+  "name": "English Training Lab",
+  "short_name": "English Lab",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f4f5f7",
+  "theme_color": "#111827",
+  "description": "Adaptive English training for workplace and product interviews."
+}
