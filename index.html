@@ -27,7 +27,8 @@
         <p class="muted">目前題庫包含 1,000 題、200 個知識點。Stage 2 新增 B1 高頻職場表達、B2 Product / Product Design、數據分析、跨團隊協作與面試表達。每天 20 題會依你的歷史作答、弱點與間隔自動調整。</p>
         <div class="hero-actions">
           <button id="startBtn" class="primary-btn" type="button">開始今日訓練</button>
-          <button id="diagnosticBtn" class="secondary-btn" type="button">跑弱點診斷</button>
+          <button id="errorVocabBtn" class="secondary-btn" type="button">錯誤單字表</button>
+          <button id="diagnosticBtn" class="ghost-btn" type="button">跑弱點診斷</button>
         </div>
       </div>
 
@@ -47,6 +48,32 @@
           <span id="dataStatus" class="pill">尚無資料</span>
         </div>
         <div id="weaknessList" class="weakness-list empty-state">完成作答後，這裡會持續累積你的弱點。</div>
+      </section>
+    </section>
+
+    <section id="reviewView" class="view hidden">
+      <div class="quiz-meta review-topbar">
+        <button id="reviewBackBtn" class="text-btn" type="button">← 返回</button>
+        <span id="errorVocabSummary" class="pill">待背 0</span>
+      </div>
+
+      <section class="panel review-panel">
+        <div class="section-heading review-heading">
+          <div>
+            <p class="eyebrow">ERROR VOCABULARY REVIEW</p>
+            <h2>錯誤單字表</h2>
+            <p class="muted">只整理你實際答錯過的單字、片語與 collocation。先看中文回想英文，再按「顯示英文」確認；標記「我記住了」只會整理清單，不會竄改你的真實做題成績。</p>
+          </div>
+        </div>
+
+        <div class="review-filters" role="group" aria-label="錯誤單字篩選">
+          <button class="review-filter active" type="button" data-review-filter="due">待背</button>
+          <button class="review-filter" type="button" data-review-filter="repeated">重複答錯</button>
+          <button class="review-filter" type="button" data-review-filter="all">全部錯過</button>
+          <button class="review-filter" type="button" data-review-filter="reviewed">已標記熟悉</button>
+        </div>
+
+        <div id="errorVocabList" class="error-vocab-list"></div>
       </section>
     </section>
 
@@ -102,5 +129,6 @@
   <script src="./js/questions.js"></script>
   <script src="./js/stage2-postprocess.js"></script>
   <script src="./js/app.js"></script>
+  <script src="./js/error-review.js"></script>
 </body>
 </html>
